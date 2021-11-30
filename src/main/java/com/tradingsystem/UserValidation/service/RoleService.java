@@ -1,12 +1,13 @@
 package com.tradingsystem.UserValidation.service;
 
-import com.tradingsystem.UserValidation.entity.RoleEntity;
+import com.tradingsystem.UserValidation.model.RoleModel;
 
 import java.util.List;
 
 public interface RoleService {
 
-    public RoleEntity createRole(RoleEntity roleEntity);
-    public List<RoleEntity> getALlRoles();
-    public RoleEntity getRoleById(Long roleId);
+    RoleModel createRole(RoleModel roleModel);
+    List<RoleModel> getAllRoles();
+    RoleModel getRoleById(Long roleId);
+    void deleteRoleById(Long roleId);
 }

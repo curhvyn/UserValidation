@@ -2,6 +2,8 @@ package com.tradingsystem.UserValidation.controller;
 
 import com.tradingsystem.UserValidation.model.JwtRequest;
 import com.tradingsystem.UserValidation.model.JwtResponse;
+import com.tradingsystem.UserValidation.model.UserModel;
+import com.tradingsystem.UserValidation.model.UserModel;
 import com.tradingsystem.UserValidation.service.CustomUserDetailService;
 import com.tradingsystem.UserValidation.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.security.Principal;
+
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api")
@@ -28,23 +30,32 @@ public class JwtController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @PostMapping("/generateToken")
+    @PostMapping("/register")
+    public ResponseEntity<UserModel> register(@RequestBody UserModel userModel){
+        UserModel userModel1 = customUserDetailService.register(userModel);
+        ResponseEntity<UserModel> re = new ResponseEntity<>(userModel1, HttpStatus.CREATED);
+        return re;
+    }
+
+    @PostMapping("/login")
     public ResponseEntity<JwtResponse> generateToken(@RequestBody JwtRequest jwtRequest){
 
-
-        //upat (Username Authentication Token)
-        UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(jwtRequest.getUserName(), jwtRequest
-                .getPassword());
+        UsernamePasswordAuthenticationToken upat = new UsernamePasswordAuthenticationToken(jwtRequest.getUserName(), jwtRequest.getPassword());
         //authenticate the user
         authenticationManager.authenticate(upat);
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(jwtRequest.getUserName());
         String jwtToken = jwtUtil.generateToken(userDetails);
 
-        JwtResponse jwtResponse;
-        jwtResponse = new JwtResponse(jwtToken);
+        JwtResponse jwtResponse = new JwtResponse(jwtToken);
         //return ResponseEntity.ok(jwtResponse);
-        return  new ResponseEntity<JwtResponse>(jwtResponse, HttpStatus.OK);
+        return new ResponseEntity<JwtResponse>(jwtResponse, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/currentUser")
+    public UserModel getCurrentUser(Principal principal) {
+        UserDetails userDetails =  this.customUserDetailService.loadUserByUsername(principal.getName());
+        return (UserModel) userDetails;
     }
 }
